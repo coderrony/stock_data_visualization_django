@@ -5,4 +5,4 @@ from .models import StockMarketData
 
 @admin.register(StockMarketData)
 class StockMarketDataAdmin(admin.ModelAdmin):
-    list_display = ["date", "trade_code", "volume"]
+    list_display = ["id", "date", "trade_code", "volume"]
