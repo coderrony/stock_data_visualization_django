@@ -4,6 +4,7 @@ from .forms import StockMarketDataForm
 from django.contrib import messages
 
 import plotly.express as px
+
 # Create your views here.
 
 
