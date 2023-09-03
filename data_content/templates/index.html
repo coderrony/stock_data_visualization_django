@@ -4,21 +4,58 @@
 <h1><a href="{% url "home" %}" class="text-dark text-decoration-none">Stock Market data</a></h1>
 <hr>
 
-<form action="{% url "home" %}" method="GET" class="w-25 m-0">
-    {% csrf_token %}
-    <select class="form-select" name="trade_code">
-        <option selected>Open This Select Trade Code</option>
-        {% for unique_trade  in unique_trade_codes  %}
-        <option value="{{unique_trade}}">{{unique_trade}}</option>
-        {% endfor %}
-    </select>
-    <input type="submit" value="Select" class="btn btn-sm btn-success mt-2">
-</form>
+
+
 
 {{chart | safe}}
 
+<div class="container d-flex mb-3">
+
+    <a class="btn btn-primary" href="{% url "allStock" %}" role="button">View All Stock</a>
 
 
+    <!--Model Start-->
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary mx-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Create Stock
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Create Stock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="#" method="POST" class="p-3">
+                        {% csrf_token %}
+                        {{form}}
+                        <input type="submit" value="Submit" class="btn btn-info">
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!--Model End-->
+
+    <!--Select Trade Code form useing javascript start-->
+    <form action="{% url "home" %}" method="GET" class="w-25 ">
+        {% csrf_token %}
+        <select class="form-select " name="trade_code" id="trade-select">
+            <option selected>Open This Select Trade Code</option>
+            {% for unique_trade in unique_trade_codes %}
+            <option value="{{ unique_trade }}">{{ unique_trade }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    <!--Select Trade Code form useing javascript end-->
+</div>
+
+<!-- stock data table start-->
 <table class="table">
     <thead>
         <tr>
@@ -45,11 +82,76 @@
             <td>{{data.open}}</td>
             <td>{{data.close}}</td>
             <td>{{data.volume}}</td>
+            <td>{{data.id}}</td>
             <td><a href="{% url "editStock" data.pk %}" class="btn btn-warning btn-sm mx-2">Update</a> <a
                     href="{% url "deleteStock" data.pk %}" class="btn btn-danger btn-sm ">Delete</a></td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+<!-- stock data table end-->
+
+<!--  Pagination start-->
+{% with prev_page=stock_data.number|add:"-4" %}
+{% with next_page=stock_data.number|add:"4" %}
+<nav>
+    <ul class="pagination">
+        {% if stock_data.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1">&laquo; first</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ stock_data.previous_page_number }}">previous</a>
+        </li>
+        {% endif %}
+
+        {% for page_num in stock_data.paginator.page_range %}
+        {% if page_num == stock_data.number %}
+        <li class="page-item active" aria-current="page">
+            <span class="page-link">{{ page_num }}</span>
+        </li>
+        {% elif page_num >= prev_page and page_num <= next_page %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+
+        {% if stock_data.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ stock_data.next_page_number }}">next</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ stock_data.paginator.num_pages }}">last &raquo;</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endwith %}
+{% endwith %}
+<!--  Pagination end-->
+
+{% block scripts_body %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectElement = document.getElementById('trade-select');
+
+        selectElement.addEventListener('change', function () {
+            const selectedValue = selectElement.value;
+            if (selectedValue) {
+                // Construct the URL with the selected value and initiate the GET request
+                const url = `{% url "home" %}?trade_code=${selectedValue}`;
+                window.location.href = url;
+            }
+        });
+    });
+</script>
+
+
+{% endblock scripts_body %}
+
+
 
 {% endblock content %}
